@@ -1,0 +1,12 @@
+# To do
+- add metrics https://prometheus.io/docs/guides/go-application/
+- containerize
+- task file
+- license
+- versioning
+    - scheme
+    - replace version string where it needs to be
+    - tags in git repo
+    - artifact storage
+- helm chart
+- configure application parameters with yaml
