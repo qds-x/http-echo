@@ -1,0 +1,128 @@
+# http echo values for vanilla deployment
+
+replicaCount: 1
+
+image:
+  repository: artifact-repository.somedomain.com/repo/http-echo
+  pullPolicy: Always
+  # Overrides the image tag whose default is the chart appVersion.
+  tag: "latest"
+
+imagePullSecrets: []
+nameOverride: ""
+fullnameOverride: ""
+
+serviceAccount:
+  create: true
+  annotations: {}
+  name: ""
+
+podAnnotations: {}
+
+podSecurityContext: {}
+
+securityContext: {}
+
+service:
+  type: ClusterIP
+  port: 8443
+
+# e.g. with nginx
+ingress:
+  enabled: true
+  className: "nginx"
+  annotations:
+    nginx.ingress.kubernetes.io/backend-protocol: "HTTPS"
+  hosts:
+    - host: http-echo.somedomain.com
+      paths:
+        - path: /
+          pathType: ImplementationSpecific
+  tls:
+  #  - secretName: chart-example-tls
+    - hosts:
+       - http-echo.somedomain.com
+
+resources:
+  limits:
+    cpu: 100m
+    memory: 128Mi
+  requests:
+    cpu: 100m
+    memory: 128Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
+
+nodeSelector: {}
+
+tolerations: []
+
+affinity: {}
+
+volumes:
+- name: injected-certs-read-only
+  projected:
+    defaultMode: 0444
+    sources:
+      - secret:
+          name: tls-secret
+      - configMap:
+          name: ca-bundle
+- name: http-echo-config
+  projected:
+    defaultMode: 0444
+    sources:
+      - configMap:
+          name: http-echo-config
+- name: service-pki
+  emptyDir:
+    medium: Memory
+
+volumeMounts:
+- name: http-echo-config
+  mountPath: /etc/http-echo/
+  readOnly: true
+- name: service-pki
+  mountPath: /pki/service
+  readOnly: true
+
+config:
+  server:
+    tls:
+      enabled: true
+      port: 8443
+      key: //pki/service/key.pem
+      cert: /pki/service/full-chain.pem
+    http_port: 8080
+
+# This concatenates the tls certs with the root CA which is
+# the format http-echo expects
+initContainers:
+- name: cat-cert-chain
+  image: alpine:latest
+  imagePullPolicy: IfNotPresent
+  workingDir: /injected/certs/service
+  command: ["/bin/sh", "-c"]
+  args:
+    - |-
+      cat tls.crt <(echo) ca.crt > /pki/service/full-chain.pem
+      cp tls.key /pki/service/key.pem
+  volumeMounts:
+  - name: injected-certs-read-only
+    mountPath: /injected/certs/service
+    readOnly: true
+  - name: service-pki
+    mountPath: /pki/service
+  resources:
+    limits:
+      cpu: 100m
+      memory: 128Mi
+    requests:
+      cpu: 100m
+      memory: 128Mi
+https:
+  enabled: true
