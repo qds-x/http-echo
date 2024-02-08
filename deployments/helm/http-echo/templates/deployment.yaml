@@ -20,6 +20,10 @@ spec:
       labels:
         {{- include "http-echo.selectorLabels" . | nindent 8 }}
     spec:
+      initContainers:
+      {{- with .Values.initContainers }}
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
       {{- with .Values.imagePullSecrets }}
       imagePullSecrets:
         {{- toYaml . | nindent 8 }}
@@ -34,19 +38,39 @@ spec:
           image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
           imagePullPolicy: {{ .Values.image.pullPolicy }}
           ports:
+          {{- if $.Values.https.enabled }}
+            - name: https
+              containerPort: 8443
+              protocol: TCP
+          {{ else }}
             - name: http
               containerPort: 8080
               protocol: TCP
+          {{- end }}
           livenessProbe:
             httpGet:
               path: /
+          {{- if $.Values.https.enabled }}
+              port: https
+              scheme: HTTPS
+          {{ else }}
               port: http
+          {{- end }}
           readinessProbe:
             httpGet:
               path: /
+          {{- if $.Values.https.enabled }}
+              port: https
+              scheme: HTTPS
+          {{ else }}
               port: http
+          {{- end }}
           resources:
             {{- toYaml .Values.resources | nindent 12 }}
+          volumeMounts:
+          {{- with .Values.volumeMounts }}
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
       {{- with .Values.nodeSelector }}
       nodeSelector:
         {{- toYaml . | nindent 8 }}
@@ -57,5 +81,9 @@ spec:
       {{- end }}
       {{- with .Values.tolerations }}
       tolerations:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+      volumes:
+      {{- with .Values.volumes }}
         {{- toYaml . | nindent 8 }}
       {{- end }}

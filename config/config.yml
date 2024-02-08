@@ -1,0 +1,7 @@
+server:
+  tls:
+    enabled: true
+    port: 8443
+    key: /home/jamie.machin/gr/src/http-echo-2/private/service-serving-cert-key.pem
+    cert: /home/jamie.machin/gr/src/http-echo-2/private/service-serving-cert.pem
+  http_port: 8080

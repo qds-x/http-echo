@@ -2,9 +2,10 @@
 
 Super simple echo request properties, headers etc.
 
-## Build
-- sans container `go build cmd/main.go`
-- container `docker build . -t http-echo:latest`
+## Actions
+- build `go build -o out cmd/`
+- build sans container, standalone executable `go build -o http-echo cmd/main.go`
+- build container `docker build . -t http-echo:latest`
 - push image `docker push wherever/http-echo:latest` 
 - helm install `helm install http-echo deployments/helm/http-echo` 
   

@@ -7,10 +7,8 @@
     - replace version string where it needs to be
     - tags in git repo
     - artifact storage
-- configure application parameters with yaml
 - readiness/liveness/startup probe https://www.reddit.com/r/kubernetes/comments/wayj42/what_should_readiness_liveness_probe_actually/
 - database query
-- TLS
 - tests
 - logging
 

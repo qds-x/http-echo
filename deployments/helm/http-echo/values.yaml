@@ -80,3 +80,20 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+volumes: {}
+volumeMounts: {}
+config:
+  server:
+    tls:
+      enabled: false
+      port: 8443
+      key: /etc/http-echo/tls-key.pem
+      cert: /etc/http-echo/tls-cert-full-chain.pem
+    http_port: 8080
+
+initContainers: {}
+
+# Right now you also need to enable tls in config
+https:
+  enabled: false
